@@ -4,10 +4,6 @@ const { sequelize } = require('../config/database');
 const Drug = require('./Drug');
 const DrugIndication = require('./DrugIndication');
 
-// Define relationships
-User.hasMany(Indication, { foreignKey: 'user_id' });
-Indication.belongsTo(User, { foreignKey: 'user_id' });
-
 // Drug and Indication have a many-to-many relationship through DrugIndication
 Drug.belongsToMany(Indication, {
   through: DrugIndication,

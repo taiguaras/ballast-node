@@ -4,8 +4,7 @@ const {
   getIndicationById,
   createIndication,
   updateIndication,
-  deleteIndication,
-  incrementOccurrences
+  deleteIndication
 } = require('../controllers/indicationController');
 const { authenticate } = require('../middleware/auth');
 
@@ -33,14 +32,6 @@ router.use(authenticate);
  *         schema:
  *           type: integer
  *           default: 10
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *       - in: query
- *         name: category
- *         schema:
- *           type: string
  *     responses:
  *       200:
  *         description: List of indications
@@ -86,19 +77,11 @@ router.get('/:id', getIndicationById);
  *           schema:
  *             type: object
  *             required:
- *               - name
+ *               - condition
  *             properties:
- *               name:
+ *               condition:
  *                 type: string
- *               description:
- *                 type: string
- *               category:
- *                 type: string
- *               priority:
- *                 type: integer
- *               metadata:
- *                 type: object
- *               source:
+ *               icd10Code:
  *                 type: string
  *     responses:
  *       201:
@@ -129,20 +112,9 @@ router.post('/', createIndication);
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               condition:
  *                 type: string
- *               description:
- *                 type: string
- *               category:
- *                 type: string
- *               status:
- *                 type: string
- *                 enum: [active, inactive, pending]
- *               priority:
- *                 type: integer
- *               metadata:
- *                 type: object
- *               source:
+ *               icd10Code:
  *                 type: string
  *     responses:
  *       200:
@@ -173,36 +145,5 @@ router.put('/:id', updateIndication);
  *         description: Indication not found
  */
 router.delete('/:id', deleteIndication);
-
-/**
- * @swagger
- * /api/indications/{id}/occurrences:
- *   patch:
- *     summary: Increment indication occurrences
- *     tags: [Indications]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               count:
- *                 type: integer
- *                 default: 1
- *     responses:
- *       200:
- *         description: Occurrences updated
- *       404:
- *         description: Indication not found
- */
-router.patch('/:id/occurrences', incrementOccurrences);
 
 module.exports = router; 

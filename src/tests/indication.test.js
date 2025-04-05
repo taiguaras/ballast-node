@@ -44,29 +44,26 @@ describe('Indication API Tests', () => {
         .post('/api/indications')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          name: 'Test Indication',
-          description: 'This is a test indication',
-          category: 'Test Category',
-          priority: 1,
-          metadata: { test: true },
-          source: 'test'
+          condition: 'Test Condition',
+          icd10Code: 'A00.0'
         });
       
       expect(response.status).toBe(201);
+      expect(response.body.success).toBe(true);
       expect(response.body.indication).toHaveProperty('id');
-      expect(response.body.indication.name).toBe('Test Indication');
+      expect(response.body.indication.condition).toBe('Test Condition');
+      expect(response.body.indication.icd10Code).toBe('A00.0');
       
       // Save the created indication for other tests
       testIndication = response.body.indication;
     });
     
-    it('should return 400 when name is missing', async () => {
+    it('should return 400 when condition is missing', async () => {
       const response = await request(app)
         .post('/api/indications')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          description: 'Missing name indication',
-          category: 'Test Category'
+          icd10Code: 'A00.0'
         });
       
       expect(response.status).toBe(400);
@@ -81,21 +78,70 @@ describe('Indication API Tests', () => {
         .set('Authorization', `Bearer ${authToken}`);
       
       expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
       expect(response.body).toHaveProperty('indications');
       expect(response.body).toHaveProperty('pagination');
       expect(Array.isArray(response.body.indications)).toBe(true);
     });
-    
-    it('should filter indications by category', async () => {
+  });
+  
+  // Test getting indication by ID
+  describe('GET /api/indications/:id', () => {
+    it('should get indication by ID', async () => {
       const response = await request(app)
-        .get('/api/indications?category=Test%20Category')
+        .get(`/api/indications/${testIndication.id}`)
         .set('Authorization', `Bearer ${authToken}`);
       
       expect(response.status).toBe(200);
-      expect(response.body.indications.length).toBeGreaterThan(0);
-      expect(response.body.indications[0].category).toBe('Test Category');
+      expect(response.body.success).toBe(true);
+      expect(response.body.indication.id).toBe(testIndication.id);
+      expect(response.body.indication.condition).toBe(testIndication.condition);
+    });
+    
+    it('should return 404 for non-existent indication', async () => {
+      const response = await request(app)
+        .get('/api/indications/99999')
+        .set('Authorization', `Bearer ${authToken}`);
+      
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
     });
   });
   
-  // Add more test cases as needed
+  // Test updating indication
+  describe('PUT /api/indications/:id', () => {
+    it('should update indication', async () => {
+      const response = await request(app)
+        .put(`/api/indications/${testIndication.id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          condition: 'Updated Condition',
+          icd10Code: 'A00.1'
+        });
+      
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.indication.condition).toBe('Updated Condition');
+      expect(response.body.indication.icd10Code).toBe('A00.1');
+    });
+  });
+  
+  // Test deleting indication
+  describe('DELETE /api/indications/:id', () => {
+    it('should delete indication', async () => {
+      const response = await request(app)
+        .delete(`/api/indications/${testIndication.id}`)
+        .set('Authorization', `Bearer ${authToken}`);
+      
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      
+      // Verify the indication is deleted
+      const getResponse = await request(app)
+        .get(`/api/indications/${testIndication.id}`)
+        .set('Authorization', `Bearer ${authToken}`);
+      
+      expect(getResponse.status).toBe(404);
+    });
+  });
 }); 

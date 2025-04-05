@@ -18,15 +18,6 @@ Indication.init({
     type: DataTypes.STRING(255),
     allowNull: true,
     field: 'icd10_code'
-  },
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    field: 'user_id',
-    references: {
-      model: 'users',
-      key: 'id'
-    }
   }
 }, {
   sequelize,
