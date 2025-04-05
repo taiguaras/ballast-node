@@ -19,8 +19,17 @@ const processJsonFile = async (req, res) => {
     console.log('✅ Request validation complete');
 
     console.log('\n[2/5] Parsing JSON file...');
-    const fileContent = JSON.parse(req.file.buffer.toString());
-    console.log(`✅ JSON file parsed successfully (${fileContent.length} bytes)`);
+    let fileContent;
+    try {
+      fileContent = JSON.parse(req.file.buffer.toString());
+      console.log(`✅ JSON file parsed successfully (${req.file.buffer.length} bytes)`);
+    } catch (error) {
+      console.error('❌ Error parsing JSON file:', error);
+      return res.status(400).json({ 
+        error: 'Invalid JSON file', 
+        details: error.message 
+      });
+    }
 
     console.log('\n[3/5] Processing drug label data...');
     const processedDrugLabel = await drugProcessor.processDrugLabel(fileContent);
@@ -44,7 +53,7 @@ const processJsonFile = async (req, res) => {
         where: { name: processedDrugLabel.drugName },
         defaults: {
           brandName: processedDrugLabel.drugName,
-          manufacturer: fileContent.Manufacturers?.[0] || null
+          manufacturer: fileContent.Manufacturers?.[0] || 'Unknown'
         },
         transaction
       });
@@ -53,16 +62,26 @@ const processJsonFile = async (req, res) => {
       // Process each indication
       console.log(`  - Processing ${processedDrugLabel.indications.length} indications...`);
       for (const indicationData of processedDrugLabel.indications) {
+        // Skip if condition is missing
+        if (!indicationData.condition) {
+          console.warn('    ⚠️ Skipping indication with missing condition');
+          continue;
+        }
+
+        // Ensure we have a valid ICD-10 code (should never be null now with our updated findICD10Code function)
+        const icd10Code = indicationData.icd10Code || 'R69';
+        
         // Create or update the indication
         const [indication] = await Indication.findOrCreate({
           where: {
             name: indicationData.condition,
-            icd10Code: indicationData.icd10Code
+            icd10Code: icd10Code
           },
           defaults: {
             name: indicationData.condition,
             description: `Indication for ${indicationData.condition}`,
-            icd10Code: indicationData.icd10Code
+            icd10Code: icd10Code,
+            status: 'active'
           },
           transaction
         });
@@ -75,11 +94,12 @@ const processJsonFile = async (req, res) => {
           },
           defaults: {
             drug_id: drug.id,
-            indication_id: indication.id
+            indication_id: indication.id,
+            status: 'active'
           },
           transaction
         });
-        console.log(`    ✅ Processed indication: ${indicationData.condition} (ICD-10: ${indicationData.icd10Code})`);
+        console.log(`    ✅ Processed indication: ${indicationData.condition} (ICD-10: ${icd10Code})`);
       }
 
       // Commit the transaction

@@ -21,9 +21,13 @@ const icd10Map = {
 /**
  * Find ICD-10 code for a given condition
  * @param {string} condition - The medical condition to look up
- * @returns {string|null} The ICD-10 code or null if not found
+ * @returns {string} The ICD-10 code or a default code if not found
  */
 function findICD10Code(condition) {
+  if (!condition) {
+    return 'R69'; // Illness, unspecified
+  }
+
   // Normalize the condition name
   const normalizedCondition = condition.trim().toLowerCase();
   
@@ -42,7 +46,8 @@ function findICD10Code(condition) {
     }
   }
   
-  return null;
+  // If no match is found, return a default code
+  return 'R69'; // Illness, unspecified
 }
 
 module.exports = {
