@@ -56,11 +56,12 @@ const processJsonFile = async (req, res) => {
         // Create or update the indication
         const [indication] = await Indication.findOrCreate({
           where: {
-            condition: indicationData.condition,
+            name: indicationData.condition,
             icd10Code: indicationData.icd10Code
           },
           defaults: {
-            condition: indicationData.condition,
+            name: indicationData.condition,
+            description: `Indication for ${indicationData.condition}`,
             icd10Code: indicationData.icd10Code
           },
           transaction
