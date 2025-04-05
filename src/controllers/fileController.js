@@ -1,101 +1,53 @@
-const { Indication, sequelize } = require('../models');
+const drugProcessor = require('../utils/drugProcessor');
 
-// Process a JSON file with indications data
+/**
+ * Process a JSON file containing drug data
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 const processJsonFile = async (req, res) => {
+  const startTime = Date.now();
+  console.log('=== Starting File Processing Pipeline ===');
+  
   try {
-    // Check if there's a file in the request
+    console.log('[1/5] Validating request...');
     if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+      console.error('❌ No file provided in request');
+      return res.status(400).json({ error: 'No file provided' });
     }
+    console.log('✅ Request validation complete');
 
-    // Parse JSON data from file
-    let jsonData;
-    try {
-      const fileContent = req.file.buffer.toString('utf8');
-      jsonData = JSON.parse(fileContent);
-    } catch (parseError) {
-      return res.status(400).json({ message: 'Invalid JSON file' });
-    }
+    console.log('[2/5] Parsing JSON file...');
+    const fileContent = JSON.parse(req.file.buffer.toString());
+    console.log(`✅ JSON file parsed successfully (${fileContent.length} bytes)`);
 
-    // Validate JSON structure
-    if (!Array.isArray(jsonData) && !jsonData.indications) {
-      return res.status(400).json({ 
-        message: 'Invalid JSON structure. Expected an array or an object with indications array' 
-      });
-    }
+    console.log('[3/5] Processing drug label data...');
+    const processedDrugLabel = await drugProcessor.processDrugLabel(fileContent);
+    console.log('✅ Drug label processing complete');
 
-    // Extract indications data
-    const indicationsData = Array.isArray(jsonData) ? jsonData : jsonData.indications;
+    console.log('[4/5] Processing copay card data...');
+    const processedCopayCard = drugProcessor.processCopayCard(fileContent);
+    console.log('✅ Copay card processing complete');
 
-    // Process indications
-    const processedIndications = [];
-    const errors = [];
-    const transaction = await sequelize.transaction();
+    console.log('[5/5] Combining processed data...');
+    const result = {
+      drugLabel: processedDrugLabel,
+      copayCard: processedCopayCard,
+      timestamp: new Date().toISOString(),
+      processingTime: `${Date.now() - startTime}ms`
+    };
 
-    try {
-      for (const data of indicationsData) {
-        // Validate required fields
-        if (!data.name) {
-          errors.push({ data, error: 'Missing name field' });
-          continue;
-        }
-
-        // Check if indication already exists
-        let indication = await Indication.findOne({
-          where: { name: data.name },
-          transaction
-        });
-
-        if (indication) {
-          // Update occurrences count
-          await indication.update({
-            occurrences: indication.occurrences + (data.occurrences || 1),
-            lastProcessed: new Date()
-          }, { transaction });
-        } else {
-          // Create new indication
-          indication = await Indication.create({
-            name: data.name,
-            description: data.description,
-            category: data.category,
-            priority: data.priority || 0,
-            metadata: data.metadata || {},
-            source: data.source || 'file_import',
-            occurrences: data.occurrences || 1,
-            lastProcessed: new Date(),
-            userId: req.user.id
-          }, { transaction });
-        }
-
-        processedIndications.push(indication);
-      }
-
-      // Commit transaction
-      await transaction.commit();
-
-      // Return results
-      return res.status(200).json({
-        message: 'File processed successfully',
-        results: {
-          total: indicationsData.length,
-          processed: processedIndications.length,
-          errors: errors.length
-        },
-        indications: processedIndications.map(i => ({
-          id: i.id,
-          name: i.name,
-          occurrences: i.occurrences
-        })),
-        errors
-      });
-    } catch (processingError) {
-      // Rollback transaction
-      await transaction.rollback();
-      throw processingError;
-    }
+    console.log('=== File Processing Pipeline Completed Successfully ===');
+    console.log(`Total processing time: ${Date.now() - startTime}ms`);
+    res.json(result);
   } catch (error) {
-    console.error('Error processing file:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error('❌ Error in file processing pipeline:', error);
+    console.error('Stack trace:', error.stack);
+    res.status(500).json({ 
+      error: 'Error processing file', 
+      details: error.message,
+      processingTime: `${Date.now() - startTime}ms`
+    });
   }
 };
 

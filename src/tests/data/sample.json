@@ -1,0 +1,33 @@
+{
+  "drugName": "Dupixent",
+  "indications": [
+    {
+      "condition": "Atopic Dermatitis",
+      "severity": "moderate-to-severe"
+    },
+    {
+      "condition": "Asthma",
+      "severity": "moderate-to-severe"
+    },
+    {
+      "condition": "Chronic Rhinosinusitis with Nasal Polyps",
+      "severity": "severe"
+    }
+  ],
+  "programName": "Dupixent MyWay Copay Card",
+  "eligibilityDetails": "Patient must have commercial insurance and be a legal resident of the US",
+  "benefits": {
+    "maxAnnualSavings": 13000.00,
+    "minOutOfPocket": 0.00
+  },
+  "forms": [
+    {
+      "name": "Enrollment Form",
+      "link": "https://www.dupixent.com/support-savings/copay-card"
+    }
+  ],
+  "funding": {
+    "evergreen": true,
+    "currentFundingLevel": "Data Not Available"
+  }
+} 
