@@ -8,7 +8,17 @@
     "dev": "nodemon src/index.js",
     "memory": "USE_MEMORY_STORE=true nodemon src/index.js",
     "test": "jest",
-    "setup": "./setup-db.sh"
+    "setup": "./setup-db.sh",
+    "docker:build": "docker build -t ballast-node .",
+    "docker:up": "docker-compose up",
+    "docker:up:detached": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up",
+    "docker:dev:detached": "docker-compose -f docker-compose.dev.yml up -d",
+    "docker:dev:down": "docker-compose -f docker-compose.dev.yml down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:db:migrate": "docker-compose exec app npx sequelize-cli db:migrate",
+    "docker:db:seed": "docker-compose exec app npx sequelize-cli db:seed:all"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

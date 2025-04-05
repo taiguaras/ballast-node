@@ -10,48 +10,109 @@ A Node.js microservices application for processing indications and data.
 - PostgreSQL database integration
 - Structured for testing
 
-## Prerequisites
+## Docker Setup
 
-- Node.js (v14 or later)
-- PostgreSQL (v12 or later) - optional, can run in memory-only mode
+This project is containerized with Docker for easy setup and consistent environments. Follow the instructions below to get started.
 
-## Setup
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+### Getting Started with Docker
+
+#### Standard Environment
+
+1. Build and start the containers:
+   ```bash
+   npm run docker:up
+   ```
+   
+   Or in detached mode:
+   ```bash
+   npm run docker:up:detached
+   ```
+
+2. Stop and remove the containers:
+   ```bash
+   npm run docker:down
+   ```
+
+#### Development Environment
+
+The development environment includes additional services like pgAdmin.
+
+1. Build and start the development containers:
+   ```bash
+   npm run docker:dev
+   ```
+   
+   Or in detached mode:
+   ```bash
+   npm run docker:dev:detached
+   ```
+
+2. Stop and remove the development containers:
+   ```bash
+   npm run docker:dev:down
+   ```
+
+### Database Operations
+
+Run migrations:
+```bash
+npm run docker:db:migrate
+```
+
+Seed the database:
+```bash
+npm run docker:db:seed
+```
+
+### Accessing Services
+
+- **Node.js API**: http://localhost:3000
+- **PostgreSQL**: localhost:5432
+- **pgAdmin** (Development only): http://localhost:5050
+  - Email: admin@admin.com
+  - Password: admin
+
+## Local Development (Without Docker)
+
+If you prefer to run the application without Docker:
 
 1. Install dependencies:
-   ```
+   ```bash
    npm install
    ```
 
-2. Configure environment variables:
-   - Copy `.env.example` to `.env` (if not done already)
-   - Update the settings to match your PostgreSQL configuration
-   - Important: Update `DB_USER` and `DB_PASSWORD` to match your PostgreSQL user
-
-3. Setup the database:
+2. Set up environment variables:
+   Create a `.env` file with the following variables:
    ```
+   NODE_ENV=development
+   PORT=3000
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_NAME=ballast
+   DB_USER=your_db_user
+   DB_PASSWORD=your_db_password
+   JWT_SECRET=your_jwt_secret_for_development
+   ```
+
+3. Run the setup script to initialize the database:
+   ```bash
    npm run setup
    ```
-   This script will:
-   - Check if PostgreSQL is installed and running
-   - Create the database if it doesn't exist
 
-4. Run the application:
-   ```
+4. Start the development server:
+   ```bash
    npm run dev
    ```
 
-### Running without PostgreSQL
-
-If you don't have PostgreSQL installed or configured, you can run the application in memory-only mode:
-
-```
-npm run memory
-```
-
-In this mode:
-- All data is stored in memory
-- Data will be lost when the server restarts
-- All API endpoints will work normally
+5. Or to use in-memory storage (no database required):
+   ```bash
+   npm run memory
+   ```
 
 ## Common Issues
 
@@ -83,8 +144,13 @@ If you encounter database connection issues:
 ## Testing
 
 Run tests with:
-```
+```bash
 npm test
+```
+
+Run tests with coverage:
+```bash
+npm test -- --coverage
 ```
 
 ## Project Structure
