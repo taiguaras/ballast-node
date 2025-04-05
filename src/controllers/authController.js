@@ -1,8 +1,12 @@
 const jwt = require('jsonwebtoken');
-const { User, sequelize } = require('../models');
+const { User } = require('../models');
 const { Op } = require('sequelize');
 
-// Register a new user
+/**
+ * Register a new user
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -15,7 +19,10 @@ const register = async (req, res) => {
     });
 
     if (existingUser) {
-      return res.status(400).json({ message: 'Username or email already exists' });
+      return res.status(400).json({ 
+        success: false,
+        message: 'Username or email already exists' 
+      });
     }
 
     // Create new user
@@ -29,24 +36,35 @@ const register = async (req, res) => {
     const token = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );
 
     // Return user data without password
     const { password: _, ...userData } = user.toJSON();
 
     res.status(201).json({
+      success: true,
       message: 'User registered successfully',
-      user: userData,
-      token
+      data: {
+        user: userData,
+        token
+      }
     });
   } catch (error) {
     console.error('Error in register controller:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ 
+      success: false,
+      message: 'Internal server error',
+      error: error.message 
+    });
   }
 };
 
-// Login user
+/**
+ * Login user
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -55,31 +73,44 @@ const login = async (req, res) => {
     const user = await User.findOne({ where: { email } });
 
     if (!user || !(await user.isValidPassword(password))) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ 
+        success: false,
+        message: 'Invalid credentials' 
+      });
     }
 
     if (!user.active) {
-      return res.status(401).json({ message: 'Account is disabled' });
+      return res.status(401).json({ 
+        success: false,
+        message: 'Account is disabled' 
+      });
     }
 
     // Generate token
     const token = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
     );
 
     // Return user data without password
     const { password: _, ...userData } = user.toJSON();
 
     res.status(200).json({
+      success: true,
       message: 'Login successful',
-      user: userData,
-      token
+      data: {
+        user: userData,
+        token
+      }
     });
   } catch (error) {
     console.error('Error in login controller:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ 
+      success: false,
+      message: 'Internal server error',
+      error: error.message 
+    });
   }
 };
 

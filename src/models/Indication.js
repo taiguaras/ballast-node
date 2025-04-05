@@ -1,68 +1,39 @@
-const { DataTypes } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
-const Indication = sequelize.define('Indication', {
+class Indication extends Model {}
+
+Indication.init({
   id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true
-  },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  description: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  category: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  status: {
-    type: DataTypes.ENUM('active', 'inactive', 'pending'),
-    defaultValue: 'active'
-  },
-  priority: {
     type: DataTypes.INTEGER,
-    defaultValue: 0
+    primaryKey: true,
+    autoIncrement: true
   },
-  metadata: {
-    type: DataTypes.JSONB,
-    defaultValue: {}
+  condition: {
+    type: DataTypes.STRING(255),
+    allowNull: false,
+    unique: true
   },
-  source: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  occurrences: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0
-  },
-  lastProcessed: {
-    type: DataTypes.DATE,
-    allowNull: true
+  icd10Code: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+    field: 'icd10_code'
   },
   userId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    field: 'user_id',
     references: {
-      model: 'Users',
+      model: 'users',
       key: 'id'
     }
   }
 }, {
+  sequelize,
+  modelName: 'Indication',
+  tableName: 'indications',
   timestamps: true,
-  indexes: [
-    {
-      fields: ['name']
-    },
-    {
-      fields: ['category']
-    },
-    {
-      fields: ['status']
-    }
-  ]
+  underscored: true
 });
 
 module.exports = Indication; 

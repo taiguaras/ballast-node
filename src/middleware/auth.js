@@ -7,7 +7,10 @@ const authenticate = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'No token provided' });
+      return res.status(401).json({ 
+        success: false,
+        message: 'No token provided' 
+      });
     }
     
     const token = authHeader.split(' ')[1];
@@ -15,24 +18,39 @@ const authenticate = async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // Check if user exists
-    const user = await User.findByPk(decoded.id);
+    // Check if user exists and convert id to integer if needed
+    const userId = typeof decoded.id === 'string' ? parseInt(decoded.id, 10) : decoded.id;
+    const user = await User.findByPk(userId);
     
     if (!user || !user.active) {
-      return res.status(401).json({ message: 'Invalid or expired token' });
+      return res.status(401).json({ 
+        success: false,
+        message: 'Invalid or expired token' 
+      });
     }
     
     // Attach user to request object
     req.user = user;
     next();
   } catch (error) {
+    console.error('Auth middleware error:', error);
     if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({ message: 'Invalid token' });
+      return res.status(401).json({ 
+        success: false,
+        message: 'Invalid token' 
+      });
     }
     if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ message: 'Token expired' });
+      return res.status(401).json({ 
+        success: false,
+        message: 'Token expired' 
+      });
     }
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({ 
+      success: false,
+      message: 'Internal server error',
+      error: error.message 
+    });
   }
 };
 
@@ -41,7 +59,10 @@ const isAdmin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
     return next();
   }
-  return res.status(403).json({ message: 'Access denied. Admin role required.' });
+  return res.status(403).json({ 
+    success: false,
+    message: 'Access denied. Admin role required.' 
+  });
 };
 
 module.exports = {

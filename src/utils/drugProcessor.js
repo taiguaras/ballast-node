@@ -27,7 +27,7 @@ class DrugProcessor {
       
       console.log('[3/3] Formatting output...');
       const result = {
-        drugName: drugData.drugName,
+        drugName: drugData.Drugs?.[0] || 'Unknown Drug',
         indications: mappedIndications,
         processingTime: `${Date.now() - startTime}ms`
       };
@@ -114,10 +114,9 @@ class DrugProcessor {
     if (drugData.TherapeuticAreas && Array.isArray(drugData.TherapeuticAreas)) {
       console.log(`Processing ${drugData.TherapeuticAreas.length} therapeutic areas...`);
       drugData.TherapeuticAreas.forEach(area => {
-        indications.add({
-          condition: area,
-          source: 'therapeutic_area'
-        });
+        // Clean up the area name by removing any parenthetical information
+        const cleanArea = area.split('(')[0].trim();
+        indications.add(cleanArea);
       });
     }
 
@@ -131,19 +130,22 @@ class DrugProcessor {
             drug.toLowerCase().includes('dupixent'))) {
           
           foundation.TherapAreas.forEach(area => {
-            indications.add({
-              condition: area,
-              source: 'foundation',
-              foundationName: foundation.ProgramName
-            });
+            // Clean up the area name by removing any parenthetical information
+            const cleanArea = area.split('(')[0].trim();
+            indications.add(cleanArea);
           });
         }
       });
     }
 
-    const uniqueIndications = Array.from(indications);
-    console.log(`Found ${uniqueIndications.length} unique indications`);
-    return uniqueIndications;
+    // Convert to array of objects with ICD-10 codes
+    const processedIndications = Array.from(indications).map(condition => ({
+      condition,
+      icd10Code: findICD10Code(condition)
+    }));
+
+    console.log(`Found ${processedIndications.length} unique indications`);
+    return processedIndications;
   }
 
   async mapToICD10(indications) {
