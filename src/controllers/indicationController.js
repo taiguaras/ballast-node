@@ -1,15 +1,27 @@
-const { Indication, sequelize } = require('../models');
+const { Indication } = require('../models');
+const { Op } = require('sequelize');
 
 // Get all indications with pagination
 const getAllIndications = async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, search } = req.query;
     
     // Calculate offset
     const offset = (page - 1) * limit;
     
+    // Build where clause for search
+    const where = {};
+    if (search) {
+      where[Op.or] = [
+        { name: { [Op.iLike]: `%${search}%` } },
+        { description: { [Op.iLike]: `%${search}%` } },
+        { icd10Code: { [Op.iLike]: `%${search}%` } }
+      ];
+    }
+    
     // Execute query
     const result = await Indication.findAndCountAll({
+      where,
       limit: parseInt(limit),
       offset: parseInt(offset),
       order: [['created_at', 'DESC']],
@@ -20,16 +32,18 @@ const getAllIndications = async (req, res) => {
     
     res.status(200).json({
       success: true,
-      indications: result.rows,
-      pagination: {
-        totalItems: result.count,
-        totalPages,
-        currentPage: parseInt(page),
-        itemsPerPage: parseInt(limit)
+      data: {
+        indications: result.rows,
+        pagination: {
+          total: result.count,
+          totalPages,
+          page: parseInt(page),
+          limit: parseInt(limit)
+        }
       }
     });
   } catch (error) {
-    console.error('Error fetching indications:', error);
+    console.error('Error getting indications:', error);
     res.status(500).json({ 
       success: false,
       message: 'Internal server error' 
@@ -53,10 +67,10 @@ const getIndicationById = async (req, res) => {
     
     res.status(200).json({
       success: true,
-      indication
+      data: { indication }
     });
   } catch (error) {
-    console.error('Error fetching indication:', error);
+    console.error('Error getting indication:', error);
     res.status(500).json({ 
       success: false,
       message: 'Internal server error' 
@@ -67,22 +81,54 @@ const getIndicationById = async (req, res) => {
 // Create new indication
 const createIndication = async (req, res) => {
   try {
-    const { condition, icd10Code } = req.body;
+    const { name, description, icd10Code, status } = req.body;
+    
+    // Validate required fields
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name is required'
+      });
+    }
+    
+    if (!description) {
+      return res.status(400).json({
+        success: false,
+        message: 'Description is required'
+      });
+    }
+    
+    if (!icd10Code) {
+      return res.status(400).json({
+        success: false,
+        message: 'ICD-10 code is required'
+      });
+    }
     
     // Create indication
     const indication = await Indication.create({
-      condition,
+      name,
+      description,
       icd10Code,
-      userId: req.user.id,
+      status: status || 'active'
     });
     
     res.status(201).json({
       success: true,
       message: 'Indication created successfully',
-      indication
+      data: { indication }
     });
   } catch (error) {
     console.error('Error creating indication:', error);
+    
+    // Check if validation error
+    if (error.name === 'SequelizeValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: error.errors[0].message
+      });
+    }
+    
     res.status(500).json({ 
       success: false,
       message: 'Internal server error' 
@@ -94,7 +140,7 @@ const createIndication = async (req, res) => {
 const updateIndication = async (req, res) => {
   try {
     const { id } = req.params;
-    const { condition, icd10Code } = req.body;
+    const { name, description, icd10Code, status } = req.body;
     
     // Find indication
     const indication = await Indication.findByPk(id);
@@ -106,19 +152,32 @@ const updateIndication = async (req, res) => {
       });
     }
     
+    // Prepare update data with only provided fields
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
+    if (icd10Code !== undefined) updateData.icd10Code = icd10Code;
+    if (status !== undefined) updateData.status = status;
+    
     // Update indication
-    await indication.update({
-      condition,
-      icd10Code
-    });
+    await indication.update(updateData);
     
     res.status(200).json({
       success: true,
       message: 'Indication updated successfully',
-      indication
+      data: { indication }
     });
   } catch (error) {
     console.error('Error updating indication:', error);
+    
+    // Check if validation error
+    if (error.name === 'SequelizeValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: error.errors[0].message
+      });
+    }
+    
     res.status(500).json({ 
       success: false,
       message: 'Internal server error' 
