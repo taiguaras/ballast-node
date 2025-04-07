@@ -1,0 +1,347 @@
+{
+	"info": {
+		"_postman_id": "9039a47f-bfa8-43a6-b529-bbff59432dbd",
+		"name": "Ballast",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "3104336"
+	},
+	"item": [
+		{
+			"name": "Register User",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/auth/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"auth",
+						"register"
+					]
+				},
+				"description": "Generated from cURL: curl --location 'http://localhost:3000/api/auth/register' \\\n--header 'Content-Type: application/json' \\\n--data-raw '{\n    \"username\": \"testuser\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}'"
+			},
+			"response": []
+		},
+		{
+			"name": "User Login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"abc@example.com\",\n    \"password\": \"abc@123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				},
+				"description": "Generated from cURL: curl --location 'http://localhost:3000/api/auth/login' \\\n--header 'Content-Type: application/json' \\\n--data-raw '{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}'"
+			},
+			"response": []
+		},
+		{
+			"name": "Get all indications",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{login_token}}"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/indications",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"indications"
+					]
+				},
+				"description": "Generated from cURL: curl --location 'http://localhost:3000/api/indications' \\\n--header 'Authorization: Bearer YOUR_TOKEN_HERE'"
+			},
+			"response": []
+		},
+		{
+			"name": "Get indication by ID",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{login_token}}"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/indications/{{indication_id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"indications",
+						"{{indication_id}}"
+					]
+				},
+				"description": "Generated from cURL: curl --location 'http://localhost:3000/api/indications/INDICATION_ID_HERE' \\\n--header 'Authorization: Bearer YOUR_TOKEN_HERE'"
+			},
+			"response": []
+		},
+		{
+			"name": "Create indication",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImRiOTNlNTZhLTAyYTctNDc1Ny1hZjkzLTE2NTc1M2I2MzlkYSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQzODA1NzA4LCJleHAiOjE3NDM4OTIxMDh9.AyrjWCeyyrL2gXscGUlFkeooQYcTyJkpqRhppEpU8Jk"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Test Indication\",\n    \"description\": \"This is a test indication\",\n    \"category\": \"Test Category\",\n    \"priority\": 1,\n    \"metadata\": {\"key\": \"value\"},\n    \"source\": \"manual\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/indications",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"indications"
+					]
+				},
+				"description": "Generated from cURL: curl --location 'http://localhost:3000/api/indications' \\\n--header 'Authorization: Bearer YOUR_TOKEN_HERE' \\\n--header 'Content-Type: application/json' \\\n--data-raw '{\n    \"name\": \"Test Indication\",\n    \"description\": \"This is a test indication\",\n    \"category\": \"Test Category\",\n    \"priority\": 1,\n    \"metadata\": {\"key\": \"value\"},\n    \"source\": \"manual\"\n}'"
+			},
+			"response": []
+		},
+		{
+			"name": "Edit indication",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{login_token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Updated Indication\",\n    \"description\": \"This is an updated description\",\n    \"category\": \"Updated Category\",\n    \"status\": \"active\",\n    \"priority\": 2\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/indications/{{indication_id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"indications",
+						"{{indication_id}}"
+					]
+				},
+				"description": "Generated from cURL: curl --location --request PUT 'http://localhost:3000/api/indications/INDICATION_ID_HERE' \\\n--header 'Authorization: Bearer YOUR_TOKEN_HERE' \\\n--header 'Content-Type: application/json' \\\n--data-raw '{\n    \"name\": \"Updated Indication\",\n    \"description\": \"This is an updated description\",\n    \"category\": \"Updated Category\",\n    \"status\": \"active\",\n    \"priority\": 2\n}'"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete indication",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{login_token}}"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/indications/{{indication_id}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"indications",
+						"{{indication_id}}"
+					]
+				},
+				"description": "Generated from cURL: curl --location --request DELETE 'http://localhost:3000/api/indications/INDICATION_ID_HERE' \\\n--header 'Authorization: Bearer YOUR_TOKEN_HERE'"
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/file/process",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer YOUR_TOKEN_HERE"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/path/to/your/file.json"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/file/process",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"file",
+						"process"
+					]
+				},
+				"description": "Generated from cURL: curl --location 'http://localhost:3000/api/file/process' \\\n--header 'Authorization: Bearer YOUR_TOKEN_HERE' \\\n--form 'file=@\"/path/to/your/file.json\"'"
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/api/file/process",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{login_token}}"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/Users/taiguaras/Documents/workspace/ballast-node/src/dupixent.json"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/file/process",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"file",
+						"process"
+					]
+				},
+				"description": "Generated from cURL: curl --location 'http://localhost:3000/api/file/process' \\\n--header 'Authorization: Bearer YOUR_TOKEN_HERE' \\\n--form 'file=@\"/Users/taiguaras/Documents/workspace/ballast-node/src/dupixent.json\"'"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "login_token",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImRiOTNlNTZhLTAyYTctNDc1Ny1hZjkzLTE2NTc1M2I2MzlkYSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzQzODA1NzA4LCJleHAiOjE3NDM4OTIxMDh9.AyrjWCeyyrL2gXscGUlFkeooQYcTyJkpqRhppEpU8Jk"
+		},
+		{
+			"key": "indication_id",
+			"value": "c3bca39a-caa9-4b2f-b054-41c03a0751ed"
+		}
+	]
+}
